@@ -25,6 +25,9 @@ int main() {
         const float Wx = static_cast<float>(GetScreenWidth());
         const float Wy = static_cast<float>(GetScreenHeight());
 
+        const float dx = 100.0f;
+        const float dy = 100.0f;
+
         const Vector2 PATH[] = {
             {Wx / 3, 0}, {Wx, Wy / 3}, {Wx / 3 * 2, Wy}, {0, Wy / 3 * 2}, {Wx / 3, 0},
         };
@@ -33,7 +36,7 @@ int main() {
         ClearBackground(Color{127, 255, 212, 255});
         DrawTextEx(font, "Надпись на форме", {40, 100}, 20.0f, 0.0f, BLACK);
         DrawLineEx({0, 0}, {Wx, Wy}, 6, RED);
-        DrawLineEx({90, 50}, {Wx, 80}, 10, BLUE);
+        DrawLineEx({90, 50}, {Wx - dx, Wy - dy}, 10, BLUE);
 
         for (int i = 0; i < 5; ++i) {
             DrawLineEx(PATH[i], PATH[i + 1], 5, DARKGREEN);
