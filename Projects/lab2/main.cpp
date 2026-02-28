@@ -1,4 +1,3 @@
-#include "figure.hpp"
 #include "hare.hpp"
 #include "turtle.hpp"
 #include <raylib.h>
