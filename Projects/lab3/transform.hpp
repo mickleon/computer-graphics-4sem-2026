@@ -22,6 +22,14 @@ inline Mat3 scale(float S) {
     return scale(S, S);
 }
 
+inline Mat3 mirrorX() {
+    return scale(-1, 1);
+}
+
+inline Mat3 mirrorY() {
+    return scale(1, -1);
+}
+
 inline Mat3 rotate(float theta) {
     Mat3 res = Mat3(1.f);
     res[0][0] = static_cast<float>(cos(theta));

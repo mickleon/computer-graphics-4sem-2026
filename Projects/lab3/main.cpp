@@ -24,9 +24,10 @@ int main() {
     NFD_Init();
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    InitWindow(400, 400, "Lab3");
+    InitWindow(600, 600, "Lab3");
     SetWindowMinSize(100, 100);
     SetTargetFPS(60);
+    SetExitKey(0);
 
     Font font = initFont("Assets/Fonts/AdwaitaSans-Regular.ttf", 20.f);
     GuiSetFont(font);
@@ -51,11 +52,30 @@ int main() {
 
         const float windowAspect = Wx / Wy;
 
+        // Поворот по часовой стрелке
+        if (IsKeyDown(KEY_E)) {
+            T = translate(-Wcx, -Wcy) * T;
+            T = rotate(0.01f) * T;
+            T = translate(Wcx, Wcy) * T;
+        }
         // Поворот против часовой стрелки
         if (IsKeyDown(KEY_Q)) {
-            T = translate(-Wcx, -Wcy) * T; // перенос начала координат в (Wcx, Wcy)
-            T = rotate(-0.01f) * T;        // поворот на -0.01 радиан относительно нового центра
-            T = translate(Wcx, Wcy) * T;   // перенос начала координат обратно
+            T = translate(-Wcx, -Wcy) * T;
+            T = rotate(-0.01f) * T;
+            T = translate(Wcx, Wcy) * T;
+        }
+
+        // Поворот по часовой стрелке (ускорение)
+        if (IsKeyDown(KEY_R)) {
+            T = translate(-Wcx, -Wcy) * T;
+            T = rotate(0.05f) * T;
+            T = translate(Wcx, Wcy) * T;
+        }
+        // Поворот против часовой стрелки (ускорени
+        if (IsKeyDown(KEY_Y)) {
+            T = translate(-Wcx, -Wcy) * T;
+            T = rotate(-0.05f) * T;
+            T = translate(Wcx, Wcy) * T;
         }
 
         // Сдвиг вверх
@@ -72,8 +92,70 @@ int main() {
             T = translate(1, 0) * T;
         }
 
+        // Сдвиг вверх (ускорение)
+        if (IsKeyDown(KEY_T)) {
+            T = translate(0, -10) * T;
+        } // Сдвиг вниз (ускорение)
+        if (IsKeyDown(KEY_G)) {
+            T = translate(0, 10) * T;
+        } // Сдвиг влево (ускорение)
+        if (IsKeyDown(KEY_F)) {
+            T = translate(-10, 0) * T;
+        } // Сдвиг вправо (ускорение)
+        if (IsKeyDown(KEY_H)) {
+            T = translate(10, 0) * T;
+        }
+
+        // Увеличение
+        if (IsKeyDown(KEY_Z)) {
+            T = translate(-Wcx, -Wcy) * T;
+            T = scale(1.1) * T;
+            T = translate(Wcx, Wcy) * T;
+        } // Уменьшение
+        if (IsKeyDown(KEY_X)) {
+            T = translate(-Wcx, -Wcy) * T;
+            T = scale(1 / 1.1) * T;
+            T = translate(Wcx, Wcy) * T;
+        }
+
+        // Отразить по горизонтали
+        if (IsKeyPressed(KEY_U)) {
+            T = translate(-Wcx, -Wcy) * T;
+            T = mirrorX() * T;
+            T = translate(Wcx, Wcy) * T;
+        } // Сжатие по горизонтали
+        if (IsKeyPressed(KEY_J)) {
+            T = translate(-Wcx, -Wcy) * T;
+            T = mirrorY() * T;
+            T = translate(Wcx, Wcy) * T;
+        }
+
+        // Растяжение по горизонтали
+        if (IsKeyDown(KEY_I)) {
+            T = translate(-Wcx, -Wcy) * T;
+            T = scale(1.1, 1) * T;
+            T = translate(Wcx, Wcy) * T;
+        } // Сжатие по горизонтали
+        if (IsKeyDown(KEY_K)) {
+            T = translate(-Wcx, -Wcy) * T;
+            T = scale(1 / 1.1, 1) * T;
+            T = translate(Wcx, Wcy) * T;
+        }
+
+        // Растяжение по вертикали
+        if (IsKeyDown(KEY_O)) {
+            T = translate(-Wcx, -Wcy) * T;
+            T = scale(1, 1.1) * T;
+            T = translate(Wcx, Wcy) * T;
+        } // Сжатие по вертикали
+        if (IsKeyDown(KEY_L)) {
+            T = translate(-Wcx, -Wcy) * T;
+            T = scale(1, 1 / 1.1) * T;
+            T = translate(Wcx, Wcy) * T;
+        }
+
         // Сброс преобразований
-        if (IsKeyPressed(KEY_C)) {
+        if (IsKeyPressed(KEY_ESCAPE)) {
             T = initT;
         }
 
