@@ -312,6 +312,13 @@ int main() {
             s.left, s.top, screenWidth - s.left - s.right, screenHeigth - s.top - s.bottom, BLACK
         );
 
+        /* for (int y = s.minY; y < s.maxY; y += s.Wy / 20) {
+            DrawLine(s.minX, y, s.maxX, y, BLACK);
+        }
+        for (int x = s.minX; x < s.maxX; x += s.Wx / 40) {
+            DrawLine(x, s.minY, x, s.maxY, BLACK);
+        } */
+
         for (const auto &model : models) {
             Mat3 TM = s.T * model.modelM;
             for (const auto &lines : model.figure) {
