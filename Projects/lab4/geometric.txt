@@ -113,12 +113,14 @@ translate 2 2
 figure
 
 popTransform # откат к малому масштабированию
+pushTransform
 rotate 90
 translate 8 7
 figure
 
 popTransform # откат к начальному состоянию
 pushTransform # сохраняем начальное состояние
+scale 2
 rotate 90
 translate 16 8
 figure
@@ -378,28 +380,27 @@ path 5
 
 # === TRANSFORM ===
 
-translate -16 -8 # перемещаем центр в начало координат
-translate 6 0 # перемещаем центр на дугу окружности
-rotate -60
-translate -6 0
-translate 16 8 # возврат центра окружности на нужную точку
-figure
-
-translate -16 -8 # перемещаем центр в начало координат
-translate 6 0 # перемещаем центр на дугу окружности
-rotate -60
-translate -6 0
-translate 16 8 # возврат центра окружности на нужную точку
-figure
-
-popTransform # откат к начальному
-pushTransform # сохраняем начальное состояние
-scale 0.5
+popTransform
+scale 0.69 # начальное масштабирование 
 pushTransform # сохраняем малое масштабирование
 translate 18 2
 figure
 
 popTransform # откат к малому масштабированию
+pushTransform
 rotate 90
 translate 12 7
+figure
+
+popTransform
+scale 2
+rotate -90
+translate 4 8
+figure
+
+translate -4 -8 # перемещаем центр в начало координат
+translate -6 0 # перемещаем центр на дугу окружности
+rotate 60
+translate 6 0
+translate 4 8 # возврат центра окружности на нужную точку
 figure
