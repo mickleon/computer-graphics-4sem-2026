@@ -29,7 +29,7 @@ struct Vec3 {
         return *this;
     }
 
-    const Vec3 operator*(const Vec3 &v) const { return Vec3(*this) *= v; }
+    Vec3 operator*(const Vec3 &v) const { return Vec3(*this) *= v; }
 
     float &operator[](size_t i) { return (reinterpret_cast<float *>(this))[i]; }
 
@@ -70,7 +70,7 @@ struct Mat3 {
         return *this;
     }
 
-    const Vec3 operator*(const Vec3 &v) const {
+    Vec3 operator*(const Vec3 &v) const {
         Vec3 res{};
         for (int i = 0; i < 3; ++i) {
             res[i] = dot((*this)[i], v);
@@ -88,7 +88,7 @@ struct Mat3 {
         return this->transpose();
     }
 
-    const Mat3 operator*(const Mat3 &m) const { return Mat3(*this) *= m; }
+    Mat3 operator*(const Mat3 &m) const { return Mat3(*this) *= m; }
 };
 
 inline Vec2 normalize(const Vec3 &v) {

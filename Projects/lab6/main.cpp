@@ -30,7 +30,7 @@ int main() {
     }
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    InitWindow(30 + 140 + 20 * 50, 20 + 50 + 10 * 50, "Lab4");
+    InitWindow(30 + 140 + 10 * 50, 20 + 50 + 10 * 50, "Lab6");
     SetWindowMinSize(170, 70);
     SetTargetFPS(60);
     SetExitKey(0);
@@ -61,19 +61,34 @@ int main() {
             s.left, s.top, screenWidth - s.left - s.right, screenHeigth - s.top - s.bottom, BLACK
         );
 
-        /* for (int y = s.minY; y < s.maxY; y += s.Wy / 20) {
-            DrawLine(s.minX, y, s.maxX, y, BLACK);
+        Mat4 proj; // матрица перехода в пространство отсечения
+        switch (s.pType) {
+        case Screen::ProjType::Ortho: // прямоугольная проекция
+            proj = ortho(s.l, s.r, s.b, s.t, -s.n, -s.f);
+            break;
+        case Screen::ProjType::Frustum: // перспективная проекция с Frustum
+            proj = frustum(s.l, s.r, s.b, s.t, s.n, s.f);
+            break;
+        case Screen::ProjType::Perspective: // перспективная проекция с Perspective
+            proj = perspective(s.fovyWork, s.aspectWork, s.n, s.f);
+            break;
         }
-        for (int x = s.minX; x < s.maxX; x += s.Wx / 40) {
-            DrawLine(x, s.minY, x, s.maxY, BLACK);
-        } */
+        // матрица кадрирования
+        Mat3 cdr = cadrRL(Vec2(-1.f, -1.f), Vec2(2.f, 2.f), Vec2(s.Wcx, s.Wcy), Vec2(s.Wx, s.Wy));
+        Mat4 C = proj * s.T; // матрица перехода от мировых координат в пространство отсечения
 
         for (const auto &model : models) {
-            Mat3 TM = s.T * model.modelM;
+            Mat4 TM = C * model.modelM;
             for (const auto &lines : model.figure) {
-                Vec2 start = normalize(TM * Vec3(lines.vertices[0], 1));
+                // начальная точка первого отрезка в трехмерных евклидовых координатах
+                Vec2 start3D = normalize(TM * Vec4(lines.vertices[0], 1.0));
+                // начальная точка первого отрезка в координатах экрана
+                Vec2 start = normalize(cdr * Vec3(Vec2(start3D), 1.f));
                 for (const auto &line : lines.vertices) {
-                    Vec2 end = normalize(TM * Vec3(line, 1));
+                    // конечная точка отрезка в трехмерных евклидовых координатах
+                    Vec3 end3D = normalize(TM * Vec4(line, 1.0));
+                    // конечная точка отрезка в координатах экрана
+                    Vec2 end = normalize(cdr * Vec3(Vec2(end3D), 1.f));
                     Vec2 tmpEnd = end;
                     if (clip(start, end, s.minX, s.minY, s.maxX, s.maxY)) {
                         DrawLineEx(
@@ -94,6 +109,7 @@ int main() {
             if (result == NFD_OKAY) {
                 models = s.getModels(outPath);
                 NFD_FreePath(outPath);
+                s.initWorkPars();
             } else if (result == NFD_CANCEL) {
                 std::cerr << "INFO: NFD: user pressed cancel" << std::endl;
             } else {

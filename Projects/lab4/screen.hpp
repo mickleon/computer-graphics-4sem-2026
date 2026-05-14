@@ -37,8 +37,8 @@ struct Screen {
         maxY = screenHeigth - bottom;
     }
 
-    std::vector<ssu::ModelFig> getModels(const char *fileName) {
-        std::vector<ssu::ModelFig> models;
+    std::vector<ssu::Model> getModels(const char *fileName) {
+        std::vector<ssu::Model> models;
         std::ifstream in;
         in.open(fileName);
 
@@ -119,7 +119,7 @@ struct Screen {
                         initM = scale(S) * translate(-mVcx, -mVcy);
                         figure.clear();
                     } else if (cmd == "figure") { // формирование новой модели
-                        models.push_back(ssu::ModelFig(figure, M * initM, Vx, Vy));
+                        models.push_back(ssu::Model(figure, M * initM, Vx, Vy));
                     } else if (cmd == "translate") { // перенос
                         float Tx, Ty;                // параметры преобразования переноса
                         s >> Tx >> Ty;               // считываем параметры
