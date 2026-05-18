@@ -56,6 +56,8 @@ inline Mat3 rotate(float theta) {
     return res;
 }
 
+// преобразование Родригеса: вращение относительно оси, проходящей через начало координат, заданной
+// единичным трехмерным вектором n
 inline Mat4 rotate(float theta, Vec3 n) {
     Vec3 n_norm = norm(n);
 
@@ -78,6 +80,10 @@ inline Mat4 rotateP(float theta, Vec3 n, Vec3 P) {
     return translate(P.x, P.y, P.z) * (rotate(theta, n) * translate(-P.x, -P.y, -P.z));
 }
 
+// реализует переход в систему координат наблюдателя
+// S - точка наблюдения
+// точка P - на которую направлен вектор наблюдения
+// вектор u - указывает условное направление вверх
 inline Mat4 lookAt(Vec3 S, Vec3 P, Vec3 u) {
     // clang-format off
     Mat4 T = Mat4(

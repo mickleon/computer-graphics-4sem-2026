@@ -188,23 +188,49 @@ struct Screen {
 
         // Вперед
         if (IsKeyDown(KEY_W)) {
-            T = lookAt(Vec3(0, 0, -0.1), Vec3(0, 0, -0.2), Vec3(0, 0.1, 0)) * T;
+            if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
+                T = lookAt(Vec3(0, 0, -0.1), Vec3(0, 0, -0.2), Vec3(0, 1, 0)) * T;
+            } else {
+                T = lookAt(Vec3(0, 0, -1), Vec3(0, 0, -2), Vec3(0, 1, 0)) * T;
+            }
         }
         // Назад
         if (IsKeyDown(KEY_S)) {
-            T = lookAt(Vec3(0, 0, 0.1), Vec3(0, 0, 0), Vec3(0, 0.1, 0)) * T;
+            if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
+                T = lookAt(Vec3(0, 0, 0.1), Vec3(0, 0, 0), Vec3(0, 1, 0)) * T;
+            } else {
+                T = lookAt(Vec3(0, 0, 1), Vec3(0, 0, 0), Vec3(0, 1, 0)) * T;
+            }
         }
         // Влево
         if (IsKeyDown(KEY_A)) {
-            T = lookAt(Vec3(-0.1, 0, 0), Vec3(-0.1, 0, -0.1), Vec3(0, 0.1, 0)) * T;
+            if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
+                T = lookAt(Vec3(-0.1, 0, 0), Vec3(-0.1, 0, -0.1), Vec3(0, 1, 0)) * T;
+            } else {
+                T = lookAt(Vec3(-1, 0, 0), Vec3(-1, 0, -1), Vec3(0, 1, 0)) * T;
+            }
+        }
+        // Вправо
+        if (IsKeyDown(KEY_D)) {
+            if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
+                T = lookAt(Vec3(0.1, 0, 0), Vec3(0.1, 0, -0.1), Vec3(0, 1, 0)) * T;
+            } else {
+                T = lookAt(Vec3(1, 0, 0), Vec3(1, 0, -1), Vec3(0, 1, 0)) * T;
+            }
         }
         // поворот относительно оси Oz
         if (IsKeyDown(KEY_R)) {
+            Vec3 u_new = Mat3(rotate(-0.01, Vec3(0, 0, 1))) * Vec3(0, 1, 0);
+            T = lookAt(Vec3(0, 0, 0), Vec3(0, 0, -1), u_new) * T;
+        }
+        if (IsKeyDown(KEY_Y)) {
             Vec3 u_new = Mat3(rotate(0.01, Vec3(0, 0, 1))) * Vec3(0, 1, 0);
             T = lookAt(Vec3(0, 0, 0), Vec3(0, 0, -1), u_new) * T;
         }
+
+        // Поворот вверх
         if (IsKeyDown(KEY_T)) {
-            // вращение камеры относительно оси вокруг точки отстоящей от начала координат в
+            // вращение камеры относительно оси вокруг точки P отстоящей от начала координат в
             // отрицательном направлении оси Oz на расстояние dist
             if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
                 Mat4 M = rotateP(
@@ -225,20 +251,146 @@ struct Screen {
                 T = lookAt(Vec3(0, 0, 0), P_new, u_new) * T;
             }
         }
+        // Поворот вниз
+        if (IsKeyDown(KEY_G)) {
+            if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
+                Mat4 M = rotateP(
+                    -0.01, Vec3(1, 0, 0), Vec3(0, 0, -dist)
+                );                                    // матрица вращения относительно точки P
+                Vec3 u_new = Mat3(M) * Vec3(0, 1, 0); // вращение направления вверх
+                Vec3 S_new = normalize(M * Vec4(0, 0, 0, 1)); // вращение начала координат
+                T = lookAt(S_new, Vec3(0, 0, -dist), u_new) * T;
+            } else {
+                // разворот камеры по вертикали
+                Mat4 M = rotate(-0.01, Vec3(1, 0, 0)); // матрица вращения относительно Ox
+                Vec3 u_new = Mat3(M) * Vec3(0, 1, 0);  // вращение направления вверх
+                Vec3 P_new = normalize(
+                    M * Vec4(0, 0, -1, 1)
+                ); // вращение точки, в которую смотрит наблюдатель
+                T = lookAt(Vec3(0, 0, 0), P_new, u_new) * T;
+            }
+        }
+        // Поворот вправо
+        if (IsKeyDown(KEY_H)) {
+            if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
+                Mat4 M = rotateP(
+                    0.01, Vec3(0, 1, 0), Vec3(0, 0, -dist)
+                );                                    // матрица вращения относительно точки P
+                Vec3 u_new = Mat3(M) * Vec3(0, 1, 0); // вращение направления вверх
+                Vec3 S_new = normalize(M * Vec4(0, 0, 0, 1)); // вращение начала координат
+                T = lookAt(S_new, Vec3(0, 0, -dist), u_new) * T;
+            } else {
+                // разворот камеры по горизонтали
+                Mat4 M = rotate(0.01, Vec3(0, 1, 0)); // матрица вращения относительно Oy
+                Vec3 u_new = Mat3(M) * Vec3(0, 1, 0); // вращение направления вверх
+                Vec3 P_new = normalize(
+                    M * Vec4(0, 0, -1, 1)
+                ); // вращение точки, в которую смотрит наблюдатель
+                T = lookAt(Vec3(0, 0, 0), P_new, u_new) * T;
+            }
+        }
+
+        // Поворот влево
+        if (IsKeyDown(KEY_F)) {
+            if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
+                Mat4 M = rotateP(
+                    -0.01, Vec3(0, 1, 0), Vec3(0, 0, -dist)
+                );                                    // матрица вращения относительно точки P
+                Vec3 u_new = Mat3(M) * Vec3(0, 1, 0); // вращение направления вверх
+                Vec3 S_new = normalize(M * Vec4(0, 0, 0, 1)); // вращение начала координат
+                T = lookAt(S_new, Vec3(0, 0, -dist), u_new) * T;
+            } else {
+                // разворот камеры по горизонтали
+                Mat4 M = rotate(-0.01, Vec3(0, 1, 0)); // матрица вращения относительно Oy
+                Vec3 u_new = Mat3(M) * Vec3(0, 1, 0);  // вращение направления вверх
+                Vec3 P_new = normalize(
+                    M * Vec4(0, 0, -1, 1)
+                ); // вращение точки, в которую смотрит наблюдатель
+                T = lookAt(Vec3(0, 0, 0), P_new, u_new) * T;
+            }
+        }
+
         // уменьшение/увеличение t
         if (IsKeyDown(KEY_I)) {
             if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
-                t -= 0.1;
+                t -= 1;
             } else {
-                t += 0.1;
+                t += 1;
             }
         }
         // уменьшение/увеличение l
         if (IsKeyDown(KEY_J)) {
             if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
-                l -= 0.1;
+                l -= 1;
             } else {
-                l += 0.1;
+                l += 1;
+            }
+        }
+        // уменьшение/увеличение b
+        if (IsKeyDown(KEY_K)) {
+            if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
+                b -= 1;
+            } else {
+                b += 1;
+            }
+        }
+        // уменьшение/увеличение r
+        if (IsKeyDown(KEY_L)) {
+            if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
+                r -= 1;
+            } else {
+                r += 1;
+            }
+        }
+
+        // уменьшение/увеличение n
+        if (IsKeyDown(KEY_U)) {
+            if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
+                if (n > 0.1 + 0.2) {
+                    n -= 0.2;
+                }
+            } else if (n < f - 0.1 - 0.2) {
+                n += 0.2;
+            }
+        }
+        // уменьшение/увеличение f
+        if (IsKeyDown(KEY_O)) {
+            if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
+                if (f > n + 0.1 + 0.2) {
+                    f -= 0.2;
+                }
+            } else {
+                f += 0.2;
+            }
+        }
+        // уменьшение/увеличение dist
+        if (IsKeyDown(KEY_B)) {
+            if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
+                if (dist > 0.1 + 0.2) {
+                    dist -= 0.2;
+                }
+            } else {
+                dist += 0.2;
+            }
+        }
+        // уменьшение/увеличение fovyWork
+        if (IsKeyDown(KEY_Z)) {
+            if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
+                if (fovyWork > 0.3 + 0.05) {
+                    fovyWork -= 0.05;
+                }
+            } else if (fovyWork < 3 - 0.05) {
+                fovyWork += 0.05;
+            }
+        }
+        // уменьшение/увеличение aspectWork
+        if (IsKeyDown(KEY_X)) {
+            if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
+                if (aspectWork > 0.01 + 0.05) {
+                    aspectWork -= 0.05;
+                }
+            } else {
+                aspectWork += 0.05;
             }
         }
     }
