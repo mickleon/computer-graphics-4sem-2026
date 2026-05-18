@@ -1,11 +1,13 @@
 #pragma once
 
 #include <cstdint>
+#include <cstdio>
 #include <fstream>
 #include <sstream>
 #include <vector>
 
 #include "figure.hpp"
+#include "matrix.hpp"
 #include "raylib.h"
 #include "transform.hpp"
 
@@ -308,6 +310,53 @@ struct Screen {
                 ); // вращение точки, в которую смотрит наблюдатель
                 T = lookAt(Vec3(0, 0, 0), P_new, u_new) * T;
             }
+        }
+
+        Vector2 mousePosition = GetMousePosition();
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && minX <= mousePosition.x &&
+            mousePosition.x <= maxX && minY <= mousePosition.y && mousePosition.y <= maxY) {
+            float sensitivity = 0.007f;
+            Vector2 raylibMouseDelta = GetMouseDelta();
+            float dx = -raylibMouseDelta.x;
+            float dy = -raylibMouseDelta.y;
+
+            // if (fabs(dx) > 0.0f) {
+            //     Mat4 M = rotate(sensitivity * dx, Vec3(1, 0, 0));
+            //     Vec3 u_new = Mat3(M) * Vec3(0, 1, 0);
+            //     Vec3 P_new = normalize(M * Vec4(0, 0, -1, 1));
+            //     T = lookAt(Vec3(0, 0, 0), P_new, u_new) * T;
+            // }
+            // if (fabs(dy) > 0.0f) {
+            //     Mat4 M = rotate(sensitivity * dy, Vec3(0, 1, 0));
+            //     Vec3 u_new = Mat3(M) * Vec3(0, 1, 0);
+            //     Vec3 P_new = normalize(M * Vec4(0, 0, -1, 1));
+            //     T = lookAt(Vec3(0, 0, 0), P_new, u_new) * T;
+            // }
+
+            Vec3 right = T[0];
+            Vec3 up = T[1];
+            Vec3 forward = Vec3(-1, -1, -1) * T[2];
+
+            if (fabs(dx) > 0.0f) {
+                Mat3 M = Mat3(rotate(sensitivity * dx, u));
+                forward = M * forward;
+                up = M * up;
+            }
+
+            right = norm(cross(forward, up));
+
+            if (fabs(dy) > 0.0f) {
+                Mat3 M = rotate(sensitivity * dy, right);
+                forward = M * forward;
+                up = M * up;
+            }
+            forward = norm(forward);
+            right = norm(cross(forward, up));
+            up = norm(cross(right, forward));
+
+            Vec3 t = Vec3(T[0][3], T[1][3], T[2][3]);
+            Vec3 eye = Vec3(-1, -1, -1) * (Mat3(T).transpose() * t);
+            T = lookAt(eye, eye + forward, up);
         }
 
         // уменьшение/увеличение t
