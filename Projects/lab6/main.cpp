@@ -1,4 +1,5 @@
 #include <iostream>
+#include <thread>
 #include <vector>
 
 #include <nfd.h>
@@ -29,6 +30,8 @@ int main() {
         return 1;
     }
 
+    std::atomic<bool> fileDialogRunning = false;
+
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(30 + 140 + 20 * 50, 20 + 50 + 10 * 50, "Lab6");
     SetWindowMinSize(170, 70);
@@ -52,7 +55,12 @@ int main() {
         float screenHeigth = static_cast<float>(GetScreenHeight());
         s.rectCalc(screenWidth, screenHeigth);
 
-        s.keyPressHandle();
+        if (!fileDialogRunning) {
+            GuiUnlock();
+            s.keyPressHandle();
+        } else {
+            GuiLock();
+        }
 
         Mat4 proj; // матрица перехода в пространство отсечения
         switch (s.pType) {
@@ -101,20 +109,24 @@ int main() {
         }
 
         // Нажата кнопка "Открыть"
-        if (GuiButton({screenWidth - 120, 20, 100, 30}, "Открыть")) {
-            nfdchar_t *outPath;
-            nfdfilteritem_t filterItem[2] = {{"Text files", "txt"}, {"All files", "*"}};
-            nfdresult_t result = NFD_OpenDialog(&outPath, filterItem, 2, nullptr);
+        if (GuiButton({screenWidth - 120, 20, 100, 30}, "Открыть") && !fileDialogRunning) {
+            fileDialogRunning = true;
+            std::thread([&]() {
+                nfdchar_t *outPath;
+                nfdfilteritem_t filterItem[2] = {{"Text files", "txt"}, {"All files", "*"}};
+                nfdresult_t result = NFD_OpenDialog(&outPath, filterItem, 2, nullptr);
 
-            if (result == NFD_OKAY) {
-                models = s.getModels(outPath);
-                NFD_FreePath(outPath);
-                s.initWorkPars();
-            } else if (result == NFD_CANCEL) {
-                std::cerr << "INFO: NFD: user pressed cancel" << std::endl;
-            } else {
-                std::cerr << "ERROR: " << NFD_GetError() << std::endl;
-            }
+                if (result == NFD_OKAY) {
+                    models = s.getModels(outPath);
+                    NFD_FreePath(outPath);
+                    s.initWorkPars();
+                } else if (result == NFD_CANCEL) {
+                    std::cerr << "INFO: NFD: user pressed cancel" << std::endl;
+                } else {
+                    std::cerr << "ERROR: " << NFD_GetError() << std::endl;
+                }
+                fileDialogRunning = false;
+            }).detach();
         }
 
         EndDrawing();

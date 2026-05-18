@@ -2,6 +2,7 @@
 #include <nfd.h>
 #include <raygui.h>
 #include <raylib.h>
+#include <thread>
 
 #include "figure.hpp"
 #include "matrix.hpp"
@@ -21,7 +22,12 @@ Font initFont(const char *fontPath, float fontSize) {
 }
 
 int main() {
-    NFD_Init();
+    if (NFD_Init() != NFD_OKAY) {
+        std::cerr << "ERROR: " << NFD_GetError() << std::endl;
+        return 1;
+    }
+
+    std::atomic<bool> fileDialogRunning = false;
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(600, 600, "Lab3");
@@ -52,111 +58,116 @@ int main() {
 
         const float windowAspect = Wx / Wy;
 
-        // Поворот по часовой стрелке
-        if (IsKeyDown(KEY_E)) {
-            T = translate(-Wcx, -Wcy) * T;
-            T = rotate(0.01f) * T;
-            T = translate(Wcx, Wcy) * T;
-        }
-        // Поворот против часовой стрелки
-        if (IsKeyDown(KEY_Q)) {
-            T = translate(-Wcx, -Wcy) * T;
-            T = rotate(-0.01f) * T;
-            T = translate(Wcx, Wcy) * T;
-        }
+        if (!fileDialogRunning) {
+            GuiUnlock();
+            // Поворот по часовой стрелке
+            if (IsKeyDown(KEY_E)) {
+                T = translate(-Wcx, -Wcy) * T;
+                T = rotate(0.01f) * T;
+                T = translate(Wcx, Wcy) * T;
+            }
+            // Поворот против часовой стрелки
+            if (IsKeyDown(KEY_Q)) {
+                T = translate(-Wcx, -Wcy) * T;
+                T = rotate(-0.01f) * T;
+                T = translate(Wcx, Wcy) * T;
+            }
 
-        // Поворот по часовой стрелке (ускорение)
-        if (IsKeyDown(KEY_R)) {
-            T = translate(-Wcx, -Wcy) * T;
-            T = rotate(0.05f) * T;
-            T = translate(Wcx, Wcy) * T;
-        }
-        // Поворот против часовой стрелки (ускорени
-        if (IsKeyDown(KEY_Y)) {
-            T = translate(-Wcx, -Wcy) * T;
-            T = rotate(-0.05f) * T;
-            T = translate(Wcx, Wcy) * T;
-        }
+            // Поворот по часовой стрелке (ускорение)
+            if (IsKeyDown(KEY_R)) {
+                T = translate(-Wcx, -Wcy) * T;
+                T = rotate(0.05f) * T;
+                T = translate(Wcx, Wcy) * T;
+            }
+            // Поворот против часовой стрелки (ускорени
+            if (IsKeyDown(KEY_Y)) {
+                T = translate(-Wcx, -Wcy) * T;
+                T = rotate(-0.05f) * T;
+                T = translate(Wcx, Wcy) * T;
+            }
 
-        // Сдвиг вверх
-        if (IsKeyDown(KEY_W)) {
-            T = translate(0, -1) * T;
-        } // Сдвиг вниз
-        if (IsKeyDown(KEY_S)) {
-            T = translate(0, 1) * T;
-        } // Сдвиг влево
-        if (IsKeyDown(KEY_A)) {
-            T = translate(-1, 0) * T;
-        } // Сдвиг вправо
-        if (IsKeyDown(KEY_D)) {
-            T = translate(1, 0) * T;
-        }
+            // Сдвиг вверх
+            if (IsKeyDown(KEY_W)) {
+                T = translate(0, -1) * T;
+            } // Сдвиг вниз
+            if (IsKeyDown(KEY_S)) {
+                T = translate(0, 1) * T;
+            } // Сдвиг влево
+            if (IsKeyDown(KEY_A)) {
+                T = translate(-1, 0) * T;
+            } // Сдвиг вправо
+            if (IsKeyDown(KEY_D)) {
+                T = translate(1, 0) * T;
+            }
 
-        // Сдвиг вверх (ускорение)
-        if (IsKeyDown(KEY_T)) {
-            T = translate(0, -10) * T;
-        } // Сдвиг вниз (ускорение)
-        if (IsKeyDown(KEY_G)) {
-            T = translate(0, 10) * T;
-        } // Сдвиг влево (ускорение)
-        if (IsKeyDown(KEY_F)) {
-            T = translate(-10, 0) * T;
-        } // Сдвиг вправо (ускорение)
-        if (IsKeyDown(KEY_H)) {
-            T = translate(10, 0) * T;
-        }
+            // Сдвиг вверх (ускорение)
+            if (IsKeyDown(KEY_T)) {
+                T = translate(0, -10) * T;
+            } // Сдвиг вниз (ускорение)
+            if (IsKeyDown(KEY_G)) {
+                T = translate(0, 10) * T;
+            } // Сдвиг влево (ускорение)
+            if (IsKeyDown(KEY_F)) {
+                T = translate(-10, 0) * T;
+            } // Сдвиг вправо (ускорение)
+            if (IsKeyDown(KEY_H)) {
+                T = translate(10, 0) * T;
+            }
 
-        // Увеличение
-        if (IsKeyDown(KEY_Z)) {
-            T = translate(-Wcx, -Wcy) * T;
-            T = scale(1.1) * T;
-            T = translate(Wcx, Wcy) * T;
-        } // Уменьшение
-        if (IsKeyDown(KEY_X)) {
-            T = translate(-Wcx, -Wcy) * T;
-            T = scale(1 / 1.1) * T;
-            T = translate(Wcx, Wcy) * T;
-        }
+            // Увеличение
+            if (IsKeyDown(KEY_Z)) {
+                T = translate(-Wcx, -Wcy) * T;
+                T = scale(1.1) * T;
+                T = translate(Wcx, Wcy) * T;
+            } // Уменьшение
+            if (IsKeyDown(KEY_X)) {
+                T = translate(-Wcx, -Wcy) * T;
+                T = scale(1 / 1.1) * T;
+                T = translate(Wcx, Wcy) * T;
+            }
 
-        // Отразить по горизонтали
-        if (IsKeyPressed(KEY_U)) {
-            T = translate(-Wcx, -Wcy) * T;
-            T = mirrorX() * T;
-            T = translate(Wcx, Wcy) * T;
-        } // Сжатие по горизонтали
-        if (IsKeyPressed(KEY_J)) {
-            T = translate(-Wcx, -Wcy) * T;
-            T = mirrorY() * T;
-            T = translate(Wcx, Wcy) * T;
-        }
+            // Отразить по горизонтали
+            if (IsKeyPressed(KEY_U)) {
+                T = translate(-Wcx, -Wcy) * T;
+                T = mirrorX() * T;
+                T = translate(Wcx, Wcy) * T;
+            } // Сжатие по горизонтали
+            if (IsKeyPressed(KEY_J)) {
+                T = translate(-Wcx, -Wcy) * T;
+                T = mirrorY() * T;
+                T = translate(Wcx, Wcy) * T;
+            }
 
-        // Растяжение по горизонтали
-        if (IsKeyDown(KEY_I)) {
-            T = translate(-Wcx, -Wcy) * T;
-            T = scale(1.1, 1) * T;
-            T = translate(Wcx, Wcy) * T;
-        } // Сжатие по горизонтали
-        if (IsKeyDown(KEY_K)) {
-            T = translate(-Wcx, -Wcy) * T;
-            T = scale(1 / 1.1, 1) * T;
-            T = translate(Wcx, Wcy) * T;
-        }
+            // Растяжение по горизонтали
+            if (IsKeyDown(KEY_I)) {
+                T = translate(-Wcx, -Wcy) * T;
+                T = scale(1.1, 1) * T;
+                T = translate(Wcx, Wcy) * T;
+            } // Сжатие по горизонтали
+            if (IsKeyDown(KEY_K)) {
+                T = translate(-Wcx, -Wcy) * T;
+                T = scale(1 / 1.1, 1) * T;
+                T = translate(Wcx, Wcy) * T;
+            }
 
-        // Растяжение по вертикали
-        if (IsKeyDown(KEY_O)) {
-            T = translate(-Wcx, -Wcy) * T;
-            T = scale(1, 1.1) * T;
-            T = translate(Wcx, Wcy) * T;
-        } // Сжатие по вертикали
-        if (IsKeyDown(KEY_L)) {
-            T = translate(-Wcx, -Wcy) * T;
-            T = scale(1, 1 / 1.1) * T;
-            T = translate(Wcx, Wcy) * T;
-        }
+            // Растяжение по вертикали
+            if (IsKeyDown(KEY_O)) {
+                T = translate(-Wcx, -Wcy) * T;
+                T = scale(1, 1.1) * T;
+                T = translate(Wcx, Wcy) * T;
+            } // Сжатие по вертикали
+            if (IsKeyDown(KEY_L)) {
+                T = translate(-Wcx, -Wcy) * T;
+                T = scale(1, 1 / 1.1) * T;
+                T = translate(Wcx, Wcy) * T;
+            }
 
-        // Сброс преобразований
-        if (IsKeyPressed(KEY_ESCAPE)) {
-            T = initT;
+            // Сброс преобразований
+            if (IsKeyPressed(KEY_ESCAPE)) {
+                T = initT;
+            }
+        } else {
+            GuiLock();
         }
 
         BeginDrawing();
@@ -172,25 +183,29 @@ int main() {
         }
 
         // Нажата кнопка "Открыть"
-        if (GuiButton({Wx - 120, 20, 100, 30}, "Открыть")) {
-            nfdchar_t *outPath;
-            nfdfilteritem_t filterItem[2] = {{"Text files", "txt"}, {"All files", "*"}};
-            nfdresult_t result = NFD_OpenDialog(&outPath, filterItem, 2, nullptr);
+        if (GuiButton({Wx - 120, 20, 100, 30}, "Открыть") && !fileDialogRunning) {
+            fileDialogRunning = true;
+            std::thread([&]() {
+                nfdchar_t *outPath;
+                nfdfilteritem_t filterItem[2] = {{"Text files", "txt"}, {"All files", "*"}};
+                nfdresult_t result = NFD_OpenDialog(&outPath, filterItem, 2, nullptr);
 
-            if (result == NFD_OKAY) {
-                figure = ssu::Figure(outPath);
-                NFD_FreePath(outPath);
+                if (result == NFD_OKAY) {
+                    figure = ssu::Figure(outPath);
+                    NFD_FreePath(outPath);
 
-                float figureAspect = figure.Vx / figure.Vy;
-                float S = figureAspect < windowAspect ? Wy / figure.Vy : Wx / figure.Vx;
-                const float Ty = S * figure.Vy;
-                initT = translate(0, Ty) * scale(S, -S);
-                T = initT;
-            } else if (result == NFD_CANCEL) {
-                std::cerr << "INFO: NFD: user pressed cancel" << std::endl;
-            } else {
-                std::cerr << "ERROR: " << NFD_GetError() << std::endl;
-            }
+                    float figureAspect = figure.Vx / figure.Vy;
+                    float S = figureAspect < windowAspect ? Wy / figure.Vy : Wx / figure.Vx;
+                    const float Ty = S * figure.Vy;
+                    initT = translate(0, Ty) * scale(S, -S);
+                    T = initT;
+                } else if (result == NFD_CANCEL) {
+                    std::cerr << "INFO: NFD: user pressed cancel" << std::endl;
+                } else {
+                    std::cerr << "ERROR: " << NFD_GetError() << std::endl;
+                }
+                fileDialogRunning = false;
+            }).detach();
         }
 
         EndDrawing();
