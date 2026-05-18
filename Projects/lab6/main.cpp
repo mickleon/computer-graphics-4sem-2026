@@ -30,7 +30,7 @@ int main() {
     }
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    InitWindow(30 + 140 + 10 * 50, 20 + 50 + 10 * 50, "Lab6");
+    InitWindow(30 + 140 + 20 * 50, 20 + 50 + 10 * 50, "Lab6");
     SetWindowMinSize(170, 70);
     SetTargetFPS(60);
     SetExitKey(0);
