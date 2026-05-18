@@ -54,13 +54,6 @@ int main() {
 
         s.keyPressHandle();
 
-        BeginDrawing();
-        ClearBackground(Color{129, 211, 248, 255});
-
-        DrawRectangleLines(
-            s.left, s.top, screenWidth - s.left - s.right, screenHeigth - s.top - s.bottom, BLACK
-        );
-
         Mat4 proj; // матрица перехода в пространство отсечения
         switch (s.pType) {
         case Screen::ProjType::Ortho: // прямоугольная проекция
@@ -76,6 +69,13 @@ int main() {
         // матрица кадрирования
         Mat3 cdr = cadrRL(Vec2(-1.f, -1.f), Vec2(2.f, 2.f), Vec2(s.Wcx, s.Wcy), Vec2(s.Wx, s.Wy));
         Mat4 C = proj * s.T; // матрица перехода от мировых координат в пространство отсечения
+
+        BeginDrawing();
+        ClearBackground(Color{129, 211, 248, 255});
+
+        DrawRectangleLines(
+            s.left, s.top, screenWidth - s.left - s.right, screenHeigth - s.top - s.bottom, BLACK
+        );
 
         for (const auto &model : models) {
             Mat4 TM = C * model.modelM;
