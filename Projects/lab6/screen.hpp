@@ -21,7 +21,6 @@ struct Screen {
     float rectCentX, rectCentY;
     float rectAspect;
 
-    Mat4 initT;                 // матрица начального преобразования
     Mat4 T = Mat4(1.f);         // матрица, в которой накапливаются все преобразования
                                 // первоначально - единичная матрица
     Vec3 S, P, u;               // координаты точки наблюдения
@@ -316,47 +315,28 @@ struct Screen {
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && minX <= mousePosition.x &&
             mousePosition.x <= maxX && minY <= mousePosition.y && mousePosition.y <= maxY) {
             float sensitivity = 0.007f;
-            Vector2 raylibMouseDelta = GetMouseDelta();
-            float dx = -raylibMouseDelta.x;
-            float dy = -raylibMouseDelta.y;
-
-            // if (fabs(dx) > 0.0f) {
-            //     Mat4 M = rotate(sensitivity * dx, Vec3(1, 0, 0));
-            //     Vec3 u_new = Mat3(M) * Vec3(0, 1, 0);
-            //     Vec3 P_new = normalize(M * Vec4(0, 0, -1, 1));
-            //     T = lookAt(Vec3(0, 0, 0), P_new, u_new) * T;
-            // }
-            // if (fabs(dy) > 0.0f) {
-            //     Mat4 M = rotate(sensitivity * dy, Vec3(0, 1, 0));
-            //     Vec3 u_new = Mat3(M) * Vec3(0, 1, 0);
-            //     Vec3 P_new = normalize(M * Vec4(0, 0, -1, 1));
-            //     T = lookAt(Vec3(0, 0, 0), P_new, u_new) * T;
-            // }
-
-            Vec3 right = T[0];
-            Vec3 up = T[1];
+            Vector2 mouseDelta = GetMouseDelta();
+            float dx = -mouseDelta.x * sensitivity;
+            float dy = -mouseDelta.y * sensitivity;
+            Vec3 u_new = T[1];
             Vec3 forward = Vec3(-1, -1, -1) * T[2];
 
             if (fabs(dx) > 0.0f) {
-                Mat3 M = Mat3(rotate(sensitivity * dx, u));
+                Mat3 M = Mat3(rotate(dx, u));
                 forward = M * forward;
-                up = M * up;
+                u_new = M * u_new;
             }
 
-            right = norm(cross(forward, up));
+            Vec3 right = norm(cross(forward, u_new));
 
             if (fabs(dy) > 0.0f) {
-                Mat3 M = rotate(sensitivity * dy, right);
+                Mat3 M = rotate(dy, right);
                 forward = M * forward;
-                up = M * up;
+                u_new = M * u_new;
             }
-            forward = norm(forward);
-            right = norm(cross(forward, up));
-            up = norm(cross(right, forward));
-
             Vec3 t = Vec3(T[0][3], T[1][3], T[2][3]);
-            Vec3 eye = Vec3(-1, -1, -1) * (Mat3(T).transpose() * t);
-            T = lookAt(eye, eye + forward, up);
+            Vec3 S = Vec3(-1, -1, -1) * (Mat3(T).transpose() * t);
+            T = lookAt(S, S + forward, u_new);
         }
 
         // уменьшение/увеличение t

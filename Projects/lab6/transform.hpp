@@ -85,15 +85,6 @@ inline Mat4 rotateP(float theta, Vec3 n, Vec3 P) {
 // точка P - на которую направлен вектор наблюдения
 // вектор u - указывает условное направление вверх
 inline Mat4 lookAt(Vec3 S, Vec3 P, Vec3 u) {
-    // clang-format off
-    Mat4 T = Mat4(
-    Vec4(1.f, 0.f, 0.f, -S.x),
-    Vec4(0.f, 1.f, 0.f, -S.y), 
-    Vec4(0.f, 0.f, 1.f, -S.z), 
-    Vec4(0.f, 0.f, 0.f, 1.f)
-    );
-    // clang-format on
-
     Vec3 e3 = norm(S - P);
     Vec3 e1 = norm(cross(u, e3));
     Vec3 e2 = norm(cross(e3, e1));
@@ -106,7 +97,7 @@ inline Mat4 lookAt(Vec3 S, Vec3 P, Vec3 u) {
         Vec4(0.f, 0.f, 0.f, 1.f)
     );
     // clang-format on
-    return R * T;
+    return R * translate(-S.x, -S.y, -S.z);
 }
 
 inline Mat4 ortho(float l, float r, float b, float t, float zn, float zf) {
