@@ -190,7 +190,7 @@ struct Screen {
         // Вперед
         if (IsKeyDown(KEY_W)) {
             if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
-                T = lookAt(Vec3(0, 0, -0.1), Vec3(0, 0, -0.2), Vec3(0, 1, 0)) * T;
+                T = lookAt(Vec3(0, 0, -0.1), Vec3(0, 0, -1.1), Vec3(0, 1, 0)) * T;
             } else {
                 T = lookAt(Vec3(0, 0, -1), Vec3(0, 0, -2), Vec3(0, 1, 0)) * T;
             }
@@ -198,7 +198,7 @@ struct Screen {
         // Назад
         if (IsKeyDown(KEY_S)) {
             if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
-                T = lookAt(Vec3(0, 0, 0.1), Vec3(0, 0, 0), Vec3(0, 1, 0)) * T;
+                T = lookAt(Vec3(0, 0, 0.1), Vec3(0, 0, -0.9), Vec3(0, 1, 0)) * T;
             } else {
                 T = lookAt(Vec3(0, 0, 1), Vec3(0, 0, 0), Vec3(0, 1, 0)) * T;
             }
@@ -337,6 +337,12 @@ struct Screen {
             Vec3 t = Vec3(T[0][3], T[1][3], T[2][3]);
             Vec3 S = Vec3(-1, -1, -1) * (Mat3(T).transpose() * t);
             T = lookAt(S, S + forward, u_new);
+        }
+
+        float wheelMove = GetMouseWheelMove();
+        if (wheelMove) {
+            wheelMove *= 3;
+            T = lookAt(Vec3(0, 0, -wheelMove), Vec3(0, 0, -1 - wheelMove), Vec3(0, 1, 0)) * T;
         }
 
         // уменьшение/увеличение t
